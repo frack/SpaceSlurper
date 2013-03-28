@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""Hackerspace notification slurper."""
+"""MediaWiki changes slurper."""
 __author__ = 'Elmer de Looff <elmer.delooff@gmail.com>'
 __version__ = '0.1'
 
