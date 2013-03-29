@@ -32,8 +32,8 @@ WIKIS = {
 class MediaWikiUpdateSlurper(threading.Thread):
     """Fetches MediaWiki changes and dumps article updates on a queue."""
     def __init__(self, space, wiki_url, queue, interval=300):
-        super(MediaWikiUpdateReader, self).__init__(
-            name='WikiUpdateReader %s' % space)
+        super(MediaWikiUpdateSlurper, self).__init__(
+            name='MediaWikiUpdateSlurper %s' % space)
         self.space = space
         self.wiki_base = wiki_url
         self.wiki_feed = wiki_url + 'Special:RecentChanges?feed=atom' # Hacky...
