@@ -1,14 +1,14 @@
 #!/usr/bin/python
 """MediaWiki changes slurper."""
 __author__ = 'Elmer de Looff <elmer.delooff@gmail.com>'
-__version__ = '0.1'
+__version__ = '0.2'
 
 # Built-in modules
 import feedparser
+import logging
 import Queue
 import threading
 import time
-
 
 WIKIS = {
         # Belgium
@@ -49,7 +49,7 @@ class MediaWikiUpdateSlurper(threading.Thread):
             try:
                 self.process_changes()
             except feedparser.xml.sax.SAXException:
-                logging.warning('Could not read changes for %s', self.space)
+                logging.warning('Could not process changes for %s', self.space)
             time.sleep(self.update_interval)
 
     def process_changes(self):
