@@ -48,8 +48,9 @@ class MediaWikiUpdateSlurper(threading.Thread):
         while True:
             try:
                 self.process_changes()
-            except feedparser.xml.sax.SAXException:
-                logging.warning('Could not process changes for %s', self.space)
+            except Exception, error:
+                logging.warning('Could not process changes for %s (%s)',
+                                self.space, type(error).__name__)
             time.sleep(self.update_interval)
 
     def process_changes(self):
@@ -71,7 +72,10 @@ class MediaWikiUpdateSlurper(threading.Thread):
 
     def wiki_changes(self):
         """Yields all recent changes in chronological order."""
-        for change in reversed(feedparser.parse(self.wiki_feed)['items']):
+        feed = feedparser.parse(self.wiki_feed)
+        if feed.bozo:
+          raise feed.bozo_exception
+        for change in reversed(feed.entries):
             if change['updated_parsed'] > self.last_update_time:
                 self.last_update_time = change['updated_parsed']
                 yield change
