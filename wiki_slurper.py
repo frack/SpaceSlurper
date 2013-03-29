@@ -20,7 +20,7 @@ WIKIS = {
         # Netherlands
         'ACKspace': 'https://ackspace.nl/wiki/',
         'Bitlair': 'https://wiki.bitlair.nl/Pages/',
-        'Frack': 'frack.nl/wiki/',
+        'Frack': 'http://frack.nl/wiki/',
         'Hack42': 'https://hack42.nl/wiki/',
         'NURDSpace': 'http://nurdspace.nl/',
         'RevSpace': 'https://revspace.nl/',
