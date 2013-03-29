@@ -46,7 +46,10 @@ class MediaWikiUpdateSlurper(threading.Thread):
     def run(self):
         """Processes wiki changes and add them to the output queue."""
         while True:
-            self.process_changes()
+            try:
+                self.process_changes()
+            except feedparser.xml.sax.SAXException:
+                logging.warning('Could not read changes for %s', self.space)
             time.sleep(self.update_interval)
 
     def process_changes(self):
