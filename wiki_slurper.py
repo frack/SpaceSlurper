@@ -29,7 +29,7 @@ WIKIS = {
         'TkkrLab': 'http://tkkrlab.nl/wiki/'}
 
 
-class MediaWikiUpdateReader(threading.Thread):
+class MediaWikiUpdateSlurper(threading.Thread):
     """Fetches MediaWiki changes and dumps article updates on a queue."""
     def __init__(self, space, wiki_url, queue, interval=300):
         super(MediaWikiUpdateReader, self).__init__(
@@ -46,27 +46,32 @@ class MediaWikiUpdateReader(threading.Thread):
     def run(self):
         """Processes wiki changes and add them to the output queue."""
         while True:
-            for change in self.article_changes():
+            self.process_changes()
+            time.sleep(self.update_interval)
+
+    def process_changes(self):
+        """Process wiki changes, put article updates on the queue.
+
+        We only consider changes that have a diff in the link. Changes without a
+        diff seem to be changes like user creation / permission changes.
+        """
+        for change in self.wiki_changes():
+            if 'diff' in change['link']:
+                article_link = self.wiki_base + change['title']
                 self.queue.put({
-                    'article': self.wiki_base + change['title'],
+                    'article': article_link.replace(' ', '_'),
                     'author': change['author'],
                     'diff': change['link'],
                     'space': self.space,
                     'timestamp': int(time.mktime(change['updated_parsed'])),
                     'title': change['title']})
-            time.sleep(self.update_interval)
 
-    def article_changes(self):
-        """Return all article changes in chronological order.
-
-        We only consider changes that have a diff in the link. Changes without a
-        diff seem to be changes like user creation / permission changes.
-        """
+    def wiki_changes(self):
+        """Yields all recent changes in chronological order."""
         for change in reversed(feedparser.parse(self.wiki_feed)['items']):
             if change['updated_parsed'] > self.last_update_time:
                 self.last_update_time = change['updated_parsed']
-                if 'diff' in change['link']:
-                    yield change
+                yield change
 
 
 def format_wiki_update(change):
@@ -81,7 +86,7 @@ def wiki_update_printer(interval=300, pause=2):
     """Prints wiki updates for all the hackerspaces in the BeNeLux."""
     queue = Queue.Queue()
     for name, wiki in WIKIS.iteritems():
-        MediaWikiUpdateReader(name, wiki, queue, interval=interval)
+        MediaWikiUpdateSlurper(name, wiki, queue, interval=interval)
     while True:
         try:
             print format_wiki_update(queue.get(timeout=0.2))
